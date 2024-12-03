@@ -1,9 +1,11 @@
 from flask import Flask, flash, request, render_template, redirect, session, make_response, url_for, g
 import sqlite3
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
 DATABASE = 'database.db'
+bcrypt = Bcrypt(app)
 
 # Function to connect to the SQLite database
 def create_table():
@@ -26,12 +28,6 @@ def create_table():
     ''')
     conn.commit()
 
-
-# Route for the homepage
-# @app.route('/')
-# def hello():
-#     return 'Say Hi!'
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -43,9 +39,12 @@ def register():
         name = request.form['name']
         email = request.form['email']
         password = request.form['password']
-
+        
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        bcrypt.check_password_hash(hashed_password, password)
+        
         with get_db() as db:
-            db.execute('INSERT INTO User (name, email,password) VALUES ("{}", "{}", "{}")'.format(name, email, password))
+            db.execute('INSERT INTO User (name, email,password) VALUES (?, ?, ?)', (name, email, hashed_password))
 
             db.commit() 
         return redirect('/login')
@@ -62,10 +61,12 @@ def login():
         with get_db() as db:
             user = db.execute('SELECT * FROM User WHERE email = ?', (email,)).fetchone()
 
-        if user and user['password'] == password:
+        # if user and user['password'] == password:
+        if user and bcrypt.check_password_hash(user['password'], password):
             session['email'] = user['email']
             resp = make_response(redirect('/dashboard'))          
             return resp
+
         else:
             return render_template('login.html', error='Invalid user')
 
@@ -132,7 +133,7 @@ def close_db(error):
 
 
 if __name__ == '__main__':
-    create_table()  # Ensure the table is created when starting the app
+    create_table()  
     app.run(debug=True)
 
 
