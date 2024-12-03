@@ -64,7 +64,8 @@ def login():
         # if user and user['password'] == password:
         if user and bcrypt.check_password_hash(user['password'], password):
             session['email'] = user['email']
-            resp = make_response(redirect('/dashboard'))          
+            resp = make_response(redirect('/dashboard')) 
+            resp.set_cookie('email', user['email'],max_age=60*60*24,secure=True, httponly=True, samesite='Strict')   # Security parameters Cookies     
             return resp
 
         else:

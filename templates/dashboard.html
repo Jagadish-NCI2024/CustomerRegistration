@@ -42,10 +42,11 @@
     </form>
 
 
-{% if message %}
-        <h2>Your Message:</h2>        
-        <p>{{ message|safe }}</p>   
-    {% endif %}
+         {% if message %}
+        <h2>Your Message:</h2>         
+<!-- <p>{{ message|safe }}</p> --> <!--Chances of XSS -->
+        <p>{{ message }}</p> 
+        {% endif %}
     </div>
   
 </div>
