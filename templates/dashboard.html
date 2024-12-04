@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,20 +35,20 @@
             </form>
     
     
-     <h2> User Review, {{user.name }}!</h2>
-    <form action="/post" method="post">
-        <label for="message">Enter a message:</label>
-        <textarea id="message" name="message"></textarea>
-        <br>
-        <button type="submit">Post Message</button>
-    </form>
+     <h2> User Review, {{user.name }}!</h2>
+    <form action="/post" method="post">
+        <label for="message">Enter a message:</label>
+        <textarea id="message" name="message"></textarea>
+        <br>
+        <button type="submit">Post Message</button>
+    </form>
 
 
          {% if message %}
-        <h2>Your Message:</h2>         
+        <h2>Your Message:</h2>         
 <!-- <p>{{ message|safe }}</p> --> <!--Chances of XSS -->
         <p>{{ message }}</p> 
-        {% endif %}
+        {% endif %}
     </div>
   
 </div>

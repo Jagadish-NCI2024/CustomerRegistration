@@ -40,6 +40,13 @@ def is_suspicious_input(input_data):
 
 def log_suspicious_activity(name, reason):
     logging.info(f"UnAuthorized act found: User: {name}, Reason: {reason}")
+
+@app.after_request
+def add_security_headers(response):
+    # Prevents the app from being embedded in an iframe
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Content-Security-Policy'] = "frame-ancestors 'none';"
+    return response
     
 
 @app.route('/')
@@ -60,7 +67,7 @@ def register():
         if not is_valid_input(email) or not is_valid_input(password):
             return "Invalid input. Provide valid alphanumeric characters."
         
-        with get_db() as db:
+        with get_db() as db:  # Using a parameterized query to prevent SQL injection
             db.execute('INSERT INTO User (name, email,password) VALUES (?, ?, ?)', (name, email, hashed_password))
 
             db.commit() 
@@ -141,7 +148,7 @@ def post_message():
       message = escape(request.form.get('message', ''))
 
     # if not is_valid_input(message):
-    #         return "Invalid search input. Only alphanumeric characters are allowed."(commented for testing functionality)
+    # return "Invalid search input. Only alphanumeric characters are allowed."(commented for testing functionality)
        
     return render_template('dashboard.html', user=user_email, message=message)
 
