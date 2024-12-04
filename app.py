@@ -1,6 +1,9 @@
 from flask import Flask, flash, request, render_template, redirect, session, make_response, url_for, g
 import sqlite3
+import re
 from flask_bcrypt import Bcrypt
+from markupsafe import escape
+import logging
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
@@ -9,14 +12,14 @@ bcrypt = Bcrypt(app)
 
 # Function to connect to the SQLite database
 def create_table():
-    conn = sqlite3.connect(DATABASE)  # Use the correct database ('database.db')
+    conn = sqlite3.connect(DATABASE) 
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
+    cursor = conn.cursor()
+    # Drop the table if it exists
+    # cursor.execute("DROP TABLE IF EXISTS User")
 
-# Drop the table if it exists
-   # cursor.execute("DROP TABLE IF EXISTS User")
-
-# Recreate the table with the correct schema
+    # Recreate the table with the correct schema
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS User (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,6 +31,17 @@ def create_table():
     ''')
     conn.commit()
 
+def is_valid_input(input_data):
+    return bool(re.match("^[a-zA-Z0-9.@]+$", input_data))
+
+def is_suspicious_input(input_data):  
+    suspicious_patterns = ["'", "--", " OR ", ";", "="]
+    return any(pattern in input_data for pattern in suspicious_patterns)
+
+def log_suspicious_activity(name, reason):
+    logging.info(f"UnAuthorized act found: User: {name}, Reason: {reason}")
+    
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -36,12 +50,15 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        password = request.form['password']
+        name = escape(request.form['name'])
+        email = escape(request.form['email'])
+        password = escape(request.form['password'])
         
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         bcrypt.check_password_hash(hashed_password, password)
+        
+        if not is_valid_input(email) or not is_valid_input(password):
+            return "Invalid input. Provide valid alphanumeric characters."
         
         with get_db() as db:
             db.execute('INSERT INTO User (name, email,password) VALUES (?, ?, ?)', (name, email, hashed_password))
@@ -58,6 +75,14 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
+        # This used in register testing functionality
+        # if not is_valid_input(email) or not is_valid_input(password): 
+        #     return "Invalid input. Provide valid alphanumeric characters."
+        
+        if is_suspicious_input(email) or is_suspicious_input(password):
+            log_suspicious_activity(email, "SQL Injection attempt in login")
+            return "Suspicious action.User blocked.!!"
+        
         with get_db() as db:
             user = db.execute('SELECT * FROM User WHERE email = ?', (email,)).fetchone()
 
@@ -79,7 +104,8 @@ def dashboard():
     if 'email' in session:
         with get_db() as db:
             user = db.execute('SELECT * FROM User WHERE email = ?', (session['email'],)).fetchone()
-        return render_template('dashboard.html', user=user)
+            safe_name = escape(user['name'])
+        return render_template('dashboard.html', user=safe_name)
 
     return redirect('/login')
 
@@ -112,12 +138,19 @@ def post_message():
     user_email = session['email']
 
     if request.method == 'POST':
-      message = request.form.get('message', '')
+      message = escape(request.form.get('message', ''))
+
+    # if not is_valid_input(message):
+    #         return "Invalid search input. Only alphanumeric characters are allowed."(commented for testing functionality)
        
-      return render_template('dashboard.html', user=user_email, message=message)
+    return render_template('dashboard.html', user=user_email, message=message)
 
-    return render_template('dashboard.html', user=user_email)
+    # return render_template('dashboard.html', user=user_email)
 
+@app.after_request
+def apply_csp(response):
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; "
+    return response
 
 # Function to get a database connection
 def get_db():
