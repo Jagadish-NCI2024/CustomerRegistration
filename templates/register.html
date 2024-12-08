@@ -15,6 +15,11 @@
     <div class=" row justify-content-center">
         <div class="col-sm-6 mt-4">
             <h2>Register form</h2>
+            <style>
+                body {background-color: powderblue;}
+                h1   {color: blue;}
+                p    {color: red;}
+                </style>
             <form action="/register" method="POST">
                 <div class="form-group">
                 <label for="name">Name:</label>
@@ -38,6 +43,8 @@
 
                 <button type="submit" class="btn btn-dark">Submit</button>
                 <a href="/login" class="btn btn-primary">Login</a>
+                
+                <p class="bottom">Already have an account?  <a class="bottom" href="{{url_for('login')}}"> Login here</a></p>
             </form>
         </div>
     </div>

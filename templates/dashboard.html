@@ -16,10 +16,20 @@
 <div class="container">
     <div class=" row justify-content-center">
         <div class="col-sm-8">
-            <h2>Welcome user dashboard</h2>
+            <h1>💐Customer Dashboard💐</h1>
             <h3>Your review is valuable for us </h3>
+            <form action="/post" method="post"></form>
             <p><b>Name: </b> {{user.name }}</p>
             <p><b>Email: </b> {{user.email }}</p>
+            
+            <style>
+                body {background-color: powderblue;}
+                h1   {color: rgba(7, 4, 0, 0.923);}
+                h2   {color: rgb(8, 166, 26);}
+                h3   {color: rgb(143, 12, 183);}
+                h4   {color:red;}
+                p    {color: rgb(36, 64, 202);}
+                </style>
             <a href="/logout" class="btn btn-dark">Logout</a>
         </div>
         <!-- <div class=" row justify-content-center"> -->
@@ -27,28 +37,29 @@
             <div class="fixed-bottom">...</div>
             
         <div class="col-sm-8">   
-            <h2>Delete Account</h2>
+          
+         <br><h2> User Review, {{user.name }}!</h2>
+         <form action="/post" method="post">
+        <label for="message">Enter a message:</label>
+        <textarea id="message" name="message" rows="3" cols="50"></textarea>
+        {% if message %}
+        <h4>Your Message:</h4>         
+                               <!-- <p>{{ message|safe }}</p> --> <!--Chances of XSS -->
+        <p>{{ message }}</p> 
+        {% endif %}
+
+        <button type="submit">Post Message</button>
+        </form>
+           <br>
+           <div class="col-sm-8">   
+            <br><h4>Delete Account</h4>
             <!-- <a href="/delete_account" class="btn btn-dark">Delete</a> -->
             <form action="/delete_account" method="post">
             <p>Are you sure you want to delete your account?</p>
             <button type="submit">Delete My Account</button>      
             </form>
-    
-    
-     <h2> User Review, {{user.name }}!</h2>
-    <form action="/post" method="post">
-        <label for="message">Enter a message:</label>
-        <textarea id="message" name="message"></textarea>
-        <br>
-        <button type="submit">Post Message</button>
-    </form>
 
-
-         {% if message %}
-        <h2>Your Message:</h2>         
-<!-- <p>{{ message|safe }}</p> --> <!--Chances of XSS -->
-        <p>{{ message }}</p> 
-        {% endif %}
+         
     </div>
   
 </div>
