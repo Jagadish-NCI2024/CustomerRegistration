@@ -3,6 +3,7 @@ import sqlite3
 import re
 from flask_bcrypt import Bcrypt
 from markupsafe import escape
+from functools import wraps
 import logging
 
 app = Flask(__name__)
@@ -15,7 +16,8 @@ def create_table():
     conn = sqlite3.connect(DATABASE) 
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
-    cursor = conn.cursor()
+  
+
     # Drop the table if it exists
     # cursor.execute("DROP TABLE IF EXISTS User")
 
@@ -26,6 +28,7 @@ def create_table():
     name TEXT NOT NULL,
     password TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
+    role TEXT DEFAULT 'user',               
     comments TEXT
       )
     ''')
@@ -60,7 +63,7 @@ def register():
         name = escape(request.form['name'])
         email = escape(request.form['email'])
         password = escape(request.form['password'])
-        
+        role = escape(request.form['role'])
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         bcrypt.check_password_hash(hashed_password, password)
         
@@ -68,13 +71,53 @@ def register():
             return "Invalid input. Provide valid alphanumeric characters."
         
         with get_db() as db:  # Using a parameterized query to prevent SQL injection
-            db.execute('INSERT INTO User (name, email,password) VALUES (?, ?, ?)', (name, email, hashed_password))
+            db.execute('INSERT INTO User (name, email,password,role) VALUES (?, ?, ?,?)', (name, email, hashed_password,role))
 
             db.commit() 
         return redirect('/login')
 
     return render_template('register.html')
 
+
+def role_required(required_role):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if 'email' not in session:
+                return redirect('/login')
+            
+            with get_db() as db:
+                user = db.execute('SELECT role FROM User WHERE email = ?', (session['email'],)).fetchone()
+                if not user or user['role'] != required_role:
+                    return "Access Denied. You do not have the required role.", 403
+            
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+@app.route('/admin_dashboard')
+@role_required('admin')
+def admin_dashboard():
+    #return "Welcome to the admin dashboard!"
+  return render_template('admin_dashboard.html')
+
+
+@app.route('/assign_role', methods=['POST'])
+@role_required('admin')
+def assign_role():
+    email = request.form.get('email')
+    new_role = request.form.get('role')
+
+    if not email or not new_role:
+        return "Email or role not provided. Please fill out all fields.", 400
+
+    with get_db() as db:
+        db.execute('UPDATE User SET role = ? WHERE email = ?', (new_role, email))
+        db.commit()
+    
+    flash(f'Role updated for {email} to {new_role}.', 'success')
+    return redirect('/admin_dashboard')
+    
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -106,16 +149,31 @@ def login():
     return render_template('login.html')
 
 
+# @app.route('/dashboard')
+# def dashboard():
+#     if 'email' in session:
+#         with get_db() as db:
+#             user = db.execute('SELECT * FROM User WHERE email = ?', (session['email'],)).fetchone()
+#             safe_name = escape(user['name'])
+           
+#         return render_template('dashboard.html', user={"name": safe_name, "email": user['email']})
+    
+#     return redirect('/login')
+
 @app.route('/dashboard')
 def dashboard():
     if 'email' in session:
         with get_db() as db:
             user = db.execute('SELECT * FROM User WHERE email = ?', (session['email'],)).fetchone()
-            safe_name = escape(user['name'])
-           
-        return render_template('dashboard.html', user={"name": safe_name, "email": user['email']})
+            if user:
+                return render_template('dashboard.html', user={
+                    "name": escape(user['name']),
+                    "email": user['email'],
+                    "role": user['role']
+                })
     
     return redirect('/login')
+
 
 
 @app.route('/logout')

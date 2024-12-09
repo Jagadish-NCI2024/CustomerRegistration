@@ -21,6 +21,7 @@
             <form action="/post" method="post"></form>
             <p><b>Name: </b> {{user.name}}</p>
             <p><b>Email: </b> {{user.email}}</p>
+            <p><b>Role:</b> {{ user.role }}</p>
             
             <style>
                 body {background-color: powderblue;}
@@ -58,6 +59,11 @@
             <p>Are you sure you want to delete your account?</p>
             <button type="submit">Delete My Account</button>      
             </form>
+
+            <form action="/assign_role" method="post">
+                <p>Admin Only...!!</p>
+                <button type="submit">Admin Login</button>      
+                </form>
 
          
     </div>

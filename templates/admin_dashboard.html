@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <h2>Manage Users</h2>
+    <form action="/assign_role" method="post">
+        <label for="email">User Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+        
+        <label for="role">Assign Role:</label><br>
+        <select id="role" name="role" required>
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+        </select><br><br>
+        
+        <button type="submit">Update Role</button>
+    </form>
+    
+    <a href="/dashboard">Go to User Dashboard</a> | <a href="/logout">Logout</a>
+    
+    <style>
+        body {background-color: powderblue;}
+        h1   {color: rgba(7, 4, 0, 0.923);}
+        h2   {color: rgb(8, 166, 26);}
+        h3   {color: rgb(143, 12, 183);}
+        h4   {color:red;}
+        p    {color: rgb(36, 64, 202);}
+        </style>
+
+</body>
+</html>
+
+
