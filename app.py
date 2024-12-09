@@ -112,8 +112,9 @@ def dashboard():
         with get_db() as db:
             user = db.execute('SELECT * FROM User WHERE email = ?', (session['email'],)).fetchone()
             safe_name = escape(user['name'])
-        return render_template('dashboard.html', user=safe_name)
-
+           
+        return render_template('dashboard.html', user={"name": safe_name, "email": user['email']})
+    
     return redirect('/login')
 
 
