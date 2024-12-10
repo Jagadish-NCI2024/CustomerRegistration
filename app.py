@@ -107,7 +107,6 @@ def admin_dashboard():
 def assign_role():
     email = request.form.get('email')
     new_role = request.form.get('role')
-
     if not email or not new_role:
         return "Email or role not provided. Please fill out all fields.", 400
 
@@ -116,6 +115,14 @@ def assign_role():
         db.commit()
     
     flash(f'Role updated for {email} to {new_role}.', 'success')
+    
+    # if 'email' in session:
+    #     with get_db() as db:
+    #         db.execute('DELETE FROM User WHERE email = ?', (email,))
+    #         db.commit()
+
+    #     session.pop('email', None)
+    #     flash('Your account has been deleted successfully.', 'success')
     return redirect('/admin_dashboard')
     
 
@@ -172,9 +179,9 @@ def dashboard():
                     "role": user['role']
                 })
     
-    return redirect('/login')
-
-
+        return redirect('/login')
+    return redirect('/admin')
+    
 
 @app.route('/logout')
 def logout():
@@ -191,9 +198,9 @@ def delete_account():
 
         session.pop('email', None)
         flash('Your account has been deleted successfully.', 'success')
-        return redirect('/login')
-
     return redirect('/login')
+
+    
 
 
 @app.route('/post', methods=['GET', 'POST'])
