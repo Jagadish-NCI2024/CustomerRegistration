@@ -11,16 +11,20 @@
     <form action="/assign_role" method="post">
         <label for="email">User Email:</label><br>
         <input type="email" id="email" name="email" required><br><br>
-        
+                 
         <label for="role">Assign Role:</label><br>
         <select id="role" name="role" required>
             <option value="user">User</option>
             <option value="admin">Admin</option>
         </select><br><br>
         
-        <button type="submit">Update Role</button>
-        <button type="submit">Delete</button>
+        <button type="submit">Update Role</button><br><br>        
     </form>
+
+    <form action="/delete_user" method="post">
+        <label for="email">User Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+        <button type="submit">Delete User</button><br><br>
     
     <a href="/dashboard">Go to User Dashboard</a> | <a href="/logout">Logout</a>
     

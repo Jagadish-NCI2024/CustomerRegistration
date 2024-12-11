@@ -5,9 +5,10 @@ from flask_bcrypt import Bcrypt
 from markupsafe import escape
 from functools import wraps
 import logging
+import os
 
 app = Flask(__name__)
-app.secret_key = 'secret_key'
+app.secret_key = os.urandom(32)
 DATABASE = 'database.db'
 bcrypt = Bcrypt(app)
 
@@ -101,30 +102,45 @@ def admin_dashboard():
     #return "Welcome to the admin dashboard!"
   return render_template('admin_dashboard.html')
 
-
+  
 @app.route('/assign_role', methods=['POST'])
 @role_required('admin')
 def assign_role():
     email = request.form.get('email')
     new_role = request.form.get('role')
+    
     if not email or not new_role:
         return "Email or role not provided. Please fill out all fields.", 400
 
+    # Update the role of the specified user
     with get_db() as db:
-        db.execute('UPDATE User SET role = ? WHERE email = ?', (new_role, email))
+        result = db.execute('UPDATE User SET role = ? WHERE email = ?', (new_role, email))
+        if result.rowcount == 0:  # Check if the update affected any rows
+            return f"No user found with email {email}.", 404
         db.commit()
     
     flash(f'Role updated for {email} to {new_role}.', 'success')
-    
-    # if 'email' in session:
-    #     with get_db() as db:
-    #         db.execute('DELETE FROM User WHERE email = ?', (email,))
-    #         db.commit()
-
-    #     session.pop('email', None)
-    #     flash('Your account has been deleted successfully.', 'success')
     return redirect('/admin_dashboard')
+
+
+@app.route('/delete_user', methods=['POST'])
+@role_required('admin')
+def delete_user():
+    email = request.form.get('email')
     
+    if not email:
+        return "Email not provided. Please provide an email to delete.", 400
+
+    # Delete the specified user
+    with get_db() as db:
+        result = db.execute('DELETE FROM User WHERE email = ?', (email,))
+        if result.rowcount == 0:  # Check if the deletion affected any rows
+            return f"No user found with email {email}.", 404
+        db.commit()
+
+    flash(f'User with email {email} has been deleted.', 'success')
+    return redirect('/admin_dashboard')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -154,18 +170,6 @@ def login():
             return render_template('login.html', error='Invalid user')
 
     return render_template('login.html')
-
-
-# @app.route('/dashboard')
-# def dashboard():
-#     if 'email' in session:
-#         with get_db() as db:
-#             user = db.execute('SELECT * FROM User WHERE email = ?', (session['email'],)).fetchone()
-#             safe_name = escape(user['name'])
-           
-#         return render_template('dashboard.html', user={"name": safe_name, "email": user['email']})
-    
-#     return redirect('/login')
 
 @app.route('/dashboard')
 def dashboard():
@@ -198,9 +202,7 @@ def delete_account():
 
         session.pop('email', None)
         flash('Your account has been deleted successfully.', 'success')
-    return redirect('/login')
-
-    
+    return redirect('/login')  
 
 
 @app.route('/post', methods=['GET', 'POST'])
