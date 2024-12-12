@@ -6,9 +6,12 @@ from markupsafe import escape
 from functools import wraps
 import logging
 import os
+from datetime import timedelta
 
 app = Flask(__name__)
 app.secret_key = os.urandom(32)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)  # Set session timeout to 5 minutes
+
 DATABASE = 'database.db'
 bcrypt = Bcrypt(app)
 
@@ -16,13 +19,11 @@ bcrypt = Bcrypt(app)
 def create_table():
     conn = sqlite3.connect(DATABASE) 
     conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-  
+    cursor = conn.cursor()  
 
     # Drop the table if it exists
     # cursor.execute("DROP TABLE IF EXISTS User")
-
-    # Recreate the table with the correct schema
+    
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS User (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,12 +52,14 @@ def add_security_headers(response):
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['Content-Security-Policy'] = "frame-ancestors 'none';"
     return response
-    
-
+@app.before_request
+def session_management():
+    if 'email' in session:
+        session.modified = True  # Update session timestamp for activity
+   
 @app.route('/')
 def index():
     return render_template('index.html')
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -115,7 +118,7 @@ def assign_role():
     # Update the role of the specified user
     with get_db() as db:
         result = db.execute('UPDATE User SET role = ? WHERE email = ?', (new_role, email))
-        if result.rowcount == 0:  # Check if the update affected any rows
+        if result.rowcount == 0: 
             return f"No user found with email {email}.", 404
         db.commit()
     
@@ -134,7 +137,7 @@ def delete_user():
     # Delete the specified user
     with get_db() as db:
         result = db.execute('DELETE FROM User WHERE email = ?', (email,))
-        if result.rowcount == 0:  # Check if the deletion affected any rows
+        if result.rowcount == 0:  
             return f"No user found with email {email}.", 404
         db.commit()
 
@@ -162,12 +165,15 @@ def login():
         # if user and user['password'] == password:
         if user and bcrypt.check_password_hash(user['password'], password):
             session['email'] = user['email']
+            session.permanent = True # session as permanent to apply timeout
             resp = make_response(redirect('/dashboard')) 
             resp.set_cookie('email', user['email'],max_age=60*60*24,secure=True, httponly=True, samesite='Strict')   # Security parameters Cookies     
             return resp
 
         else:
             return render_template('login.html', error='Invalid user')
+    if'email' in session:
+        return redirect('/dashboard')
 
     return render_template('login.html')
 
@@ -182,7 +188,7 @@ def dashboard():
                     "email": user['email'],
                     "role": user['role']
                 })
-    
+        session.pop('email', None)
         return redirect('/login')
     return redirect('/admin')
     
@@ -191,7 +197,6 @@ def dashboard():
 def logout():
     session.pop('email', None)
     return redirect('/login')
-
 
 @app.route('/delete_account', methods=['POST'])
 def delete_account():
@@ -204,11 +209,10 @@ def delete_account():
         flash('Your account has been deleted successfully.', 'success')
     return redirect('/login')  
 
-
 @app.route('/post', methods=['GET', 'POST'])
 def post_message():
     if 'email' not in session:
-        return redirect(url_for('login'))  # Redirect to login if not authenticated
+        return redirect(url_for('login'))  
 
     user_email = session['email']
 
@@ -220,7 +224,7 @@ def post_message():
        
     return render_template('dashboard.html', user=user_email, message=message)
 
-    # return render_template('dashboard.html', user=user_email)
+    
 
 @app.after_request
 def apply_csp(response):
