@@ -1,52 +1,65 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Auth system</title>
+  <title>Auth System</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"> 
+  <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
   <style>
+    /* General styles */
+    body {
+      background-image: url(cus.jpg); /* Ensure the image is in the correct static folder */
+      background-size: cover; /* Ensures the image covers the entire background */
+      background-position: center;
+      background-repeat: no-repeat;
+      font-family: Arial, sans-serif;
+    }
+
     h1 {
       color: blue;
-      font-family: verdana;
-      font-size: 300%;
+      font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+      font-size: 3rem;
+      text-align: center;
     }
+
+    h2 {
+      color: rgb(3, 171, 3);
+      font-size: 2rem;
+      text-align: center;
+    }
+
     p {
       color: red;
-      font-family: courier;
-      font-size: 160%;
+      font-family: Courier, monospace;
+      font-size: 1.6rem;
     }
-    </style>
+
+    .container {
+      background: rgba(111, 231, 177, 0.8); /* Semi-transparent white background for readability */
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 50px;
+    }
+
+    .btn {
+      margin: 5px;
+    }
+  </style>
+  <title>background-image</title>
 </head>
 <body>
-    <div class="container">
-    <div class=" row justify-content-center">
-        <div class="col-sm-8">
-            <h1> 😊Welcome to Home page 😊</h1> <br>
-            
-            <h2>We consider your valuable reviews 👍</h2><br>
-                        <!-- <h4>Access your dashboard by clicking this link</h4> -->
-            <style>
-                body {background-color: powderblue;}
-                h1   {color: blue;}
-                h2   {color: green;}
-                p    {color: red;}
-                </style>
-
-            
-            <a href="/register" class="btn btn-primary mt-3">Register</a>
-            <a href="/login" class="btn btn-dark mt-3">Login</a>
-            
-                        
-        </div>
-
-    </div>
+  <!-- <img src="https://www.lumina-intelligence.com/wp-content/uploads/2019/05/GettyImages-1074272374-thegem-blog-default.jpg" alt="image"> -->
   
-</div>
-
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-sm-8 text-center">
+        <h1>😊 Welcome to Customer Review Home Page 😊</h1> <br>
+        <h2>We consider your valuable reviews 👍</h2><br>
+        <a href="/register" class="btn btn-primary mt-3">Register</a>
+        <a href="/login" class="btn btn-dark mt-3">Login</a>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

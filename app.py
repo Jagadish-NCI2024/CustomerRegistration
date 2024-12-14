@@ -224,8 +224,7 @@ def post_message():
        
     return render_template('dashboard.html', user=user_email, message=message)
 
-    
-
+  
 @app.after_request
 def apply_csp(response):
     response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; "
