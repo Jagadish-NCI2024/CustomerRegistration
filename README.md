@@ -1,6 +1,6 @@
 # Customer Review and Registration System
 
-A Flask-based web application for user registration, login, and role-based access control. This application includes features like password hashing, session management, SQL injection prevention, and optional CAPTCHA integration.
+A Flask-based web application for user registration, login, and role-based access control. This application includes features like password hashing, session management, SQL injection prevention, Input Validation and Sanitization.
 
 Github Link : https://github.com/Jagadish-NCI2024/UserRegistration/tree/master
 YouTube Video Link : https://www.youtube.com/watch?v=x7nYvLZ0AwE
