@@ -4,7 +4,6 @@ A Flask-based web application for user registration, login, and role-based acces
 
 Github Link : https://github.com/Jagadish-NCI2024/UserRegistration/tree/master
 YouTube Video Link : https://www.youtube.com/watch?v=x7nYvLZ0AwE
-
 Reference Link: https://github.com/kritimyantra/flask-authentication-system/tree/main
 ---
 
